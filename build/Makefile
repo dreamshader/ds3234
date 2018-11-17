@@ -52,7 +52,8 @@ EXAMPLE_NAME = rtcTest
 
 BUILD_FLAGS = -I. -L ../build
 #
-PIGPIO = -lpigpio
+#PIGPIO = -lpigpio
+PIGPIO = -ldsGPIO
 #
 #
 EXTRALIBS = -lrt -lpthread ${PIGPIO}

@@ -33,7 +33,11 @@
 #include <sys/stat.h>
 #include <time.h>
 
+#ifdef _USE_PIGPIO_
 #include <pigpio.h>
+#else // NOT _USE_PIGPIO_
+#include <dsGPIO.h>
+#endif // _USE_PIGPIO_
 
 using namespace std;
 

@@ -20,15 +20,6 @@
  ***********************************************************************
  */
 
-// #define DS324_SPI_BUS                       0
-// #define DS324_SPI_DEVICE                    0
-// #define DS324_SPI_MODE          (SPI_MODE_1 | SPI_NO_CS)
-// #define DS324_SPI_BITS_PER_WORD             8
-// #define DS324_SPI_SPEED                500000 
-// #define DS324_SPI_DELAY                     0
-// #define DS324_PIN_CS0                       8
-
-
 #include "dsUtil.h"
 #include "dsSPI.h"
 
@@ -47,37 +38,41 @@ int main(int argc, char *argv[])
     uint16_t spiDelay    = DS324_SPI_DELAY;
     uint32_t maxDataSize = DS3234_DATA_BUF_SIZE;
 
-
-
     dsDS3234 clock1;
     struct _ds3234_timestruct_ now;
 
-
-
+#ifdef _USE_PIGPIO_
     if( (retVal = gpioInitialise()) >= 0)
     {
+#else // NOT _USE_PIGPIO_
+    if( (retVal = pinLock( csPin, DSGPIO_PIN_MODE_OUTPUT )) >= 0 )
+    {
+        if( retVal = pinState( csPin, DSGPIO_ACTION_SET_STATE, 
+                                   DSGPIO_PIN_STATE_HIGH ) >= 0 )
+        {
+#endif // _USE_PIGPIO_
 
-        retVal = clock1.connectSPI(bus, device, csPin, spiMode, spiBits, 
+            retVal = clock1.connectSPI(bus, device, csPin, spiMode, spiBits, 
                                     spiBaud, spiDelay, maxDataSize );
 
-printf("connectSPI: retVal = %d\n", retVal );
+            printf("connectSPI: retVal = %d\n", retVal );
 
-        retVal = clock1.readDate( &now );
+            if( retVal >= 0 )
+            {
+                retVal = clock1.readDate( &now );
 
-printf("readDate: retVal = %d\n", retVal );
+                printf("readDate: retVal = %d\n", retVal );
+            }
 
-
-//    gpioSetMode( pinCS0, PI_OUTPUT );
-//    gpioWrite(   pinCS0, PI_HIGH );
-
-//    spiSettingsNew.mode = DS324_SPI_MODE;
-//    spiSettingsNew.bits = DS324_SPI_BITS_PER_WORD;
-//    spiSettingsNew.baud = DS324_SPI_SPEED;
-//    spiSettingsNew.delay = DS324_SPI_DELAY;
-
+#ifdef _USE_PIGPIO_
         gpioTerminate();
-
     }
+#else // NOT _USE_PIGPIO_
+        }
+        pinRelease( csPin );
+    }
+#endif // _USE_PIGPIO_
+
 
     return( retVal );
 

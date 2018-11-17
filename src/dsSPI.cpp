@@ -49,12 +49,21 @@ int spiXferMulti8(int spiHandle, const uint8_t csPin, struct _spiTransferSetting
         spiData.bits_per_word = pSettings->spiBits;
         spiData.cs_change     = 0;
 
+#ifdef _USE_PIGPIO_
         gpioWrite(csPin, PI_LOW);
+#else // NOT _USE_PIGPIO_
+        pinState( csPin, DSGPIO_ACTION_SET_STATE, DSGPIO_PIN_STATE_LOW );
+#endif // _USE_PIGPIO_
+
         if( (retVal = ioctl(spiHandle, SPI_IOC_MESSAGE(1), &spiData)) < 0 )
         {
             perror("SPI Message failed.");
         }
+#ifdef _USE_PIGPIO_
         gpioWrite(csPin, PI_HIGH);
+#else // NOT _USE_PIGPIO_
+        pinState( csPin, DSGPIO_ACTION_SET_STATE, DSGPIO_PIN_STATE_HIGH );
+#endif // _USE_PIGPIO_
 
     }
     else
@@ -72,7 +81,12 @@ int spiXferSingle8(int spiHandle, const uint8_t csPin, struct _spiTransferSettin
 
     if( pSettings != NULL )
     {
+#ifdef _USE_PIGPIO_
         gpioWrite(csPin, PI_LOW);
+#else // NOT _USE_PIGPIO_
+        pinState( csPin, DSGPIO_ACTION_SET_STATE, DSGPIO_PIN_STATE_LOW );
+#endif // _USE_PIGPIO_
+
         for(int i = 0; i < dataLength; i++)
         {
             memset( &spiData[i], '\0', sizeof(spiData[i]) );
@@ -91,7 +105,13 @@ int spiXferSingle8(int spiHandle, const uint8_t csPin, struct _spiTransferSettin
         {
             perror("SPI Message failed.");
         }
+
+#ifdef _USE_PIGPIO_
         gpioWrite(csPin, PI_HIGH);
+#else // NOT _USE_PIGPIO_
+        pinState( csPin, DSGPIO_ACTION_SET_STATE, DSGPIO_PIN_STATE_HIGH );
+#endif // _USE_PIGPIO_
+
     }
     else
     {
