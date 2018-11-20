@@ -157,7 +157,9 @@ int dsConnection::connectSPI( int bus, int device, int csPin, uint8_t  spiMode, 
                     }
                 }
             }
+#ifdef _DEBUG_
 fprintf(stdout, "Open device [%s] returns %d as handle\n", _spi.pDeviceName, _spi.spiHandle );
+#endif // _DEBUG_
         }
     }
 
@@ -182,16 +184,20 @@ int dsConnection::xfer( int mode, void* pDataOut, void* pDataIn, uint32_t dataSi
     transfer.spiBaud = _spi.spiBaudNew;
     transfer.spiDelay = _spi.spiDelayNew;
 
+#ifdef _DEBUG_
 fprintf(stdout, "DataOut before XferMulti8:\n");
 
     dumpBuffer( (uint8_t*) pDataOut, dataSize );
+#endif // _DEBUG_
 
     retVal = spiXferMulti8(_spi.spiHandle, _spi.pinCS, &transfer, 
                   (uint8_t*) pDataOut, (uint8_t*) pDataIn, (int) dataSize);
 
+#ifdef _DEBUG_
 fprintf(stdout, "DataIn after XferMulti8:\n");
 
     dumpBuffer( (uint8_t*) pDataIn, retVal );
+#endif // _DEBUG_
 
     return( retVal );
 }

@@ -83,6 +83,9 @@ int main(int argc, char *argv[])
 
                 currTime.century =  0;
 
+                clock1.printTimestruct( &currTime );
+
+
                 retVal = clock1.writeDate( &currTime );
                 printf("writeDate: retVal = %d\n", retVal );
 
@@ -94,11 +97,13 @@ int main(int argc, char *argv[])
                 alarmSettings.hour     = 22;
                 alarmSettings.date     = 17;
 
+                clock1.printAlarmSettings( &alarmSettings );
                 retVal = clock1.setAlarm( &alarmSettings );
                 printf("setAlarm: retVal = %d\n", retVal );
 
                 retVal = clock1.readAlarm( &alarmSettings );
                 printf("writeDate: retVal = %d\n", retVal );
+                clock1.printAlarmSettings( &alarmSettings );
 
                 retVal = clock1.enableAlarm( 1 );
                 printf("enableAlarm: retVal = %d\n", retVal );

@@ -166,7 +166,7 @@ class dsDS3234 {
         int enableAlarm( int alarmNo );
         int disableAlarm( int alarmNo );
 
-        void readAll( void );
+        int readAll( void );
 
 
 

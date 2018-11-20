@@ -57,12 +57,9 @@ void dsDS3234::buffer2Timestruct( uint8_t buffer[], struct _ds3234_timestruct_ *
 {
     pTime->second = bcd2bin( buffer[0] & DS3234_REG_00_SECONDS_MASK );
     pTime->minute = bcd2bin( buffer[1] & DS3234_REG_01_MINUTES_MASK );
-//     pTime->hour   = bcd2bin( buffer[2] & DS3234_REG_02_HOURS_MASK );
 
     pTime->hour   = bcd2bin( buffer[2] & (DS3234_REG_02_HOURS_MASK |
                                            DS3234_REG_02_AM_PM_10HOURS_MASK) );
-
-    // pTime->hour += ((buffer[2] & DS3234_REG_02_AM_PM_10HOURS_MASK) >> 5) * 10;
 
     pTime->hour24 = (buffer[2] & DS3234_REG_02_12_24_FLAG_MASK) >> 6;
 
@@ -144,12 +141,16 @@ int dsDS3234::readDate( struct _ds3234_timestruct_ *pTime )
     retVal = connection.xfer( DS_CONNECTION_MODE_READ, (void*) dataOut, 
                               (void*) dataIn, DS3234_NUM_DATE_REGS + 1 );
 
+#ifdef _DEBUG_
     printf("retVal = %d\n", retVal);
     dumpBuffer( dataIn, retVal );
+#endif // _DEBUG_
 
     buffer2Timestruct( &dataIn[1], pTime, retVal );
 
+#ifdef _DEBUG_
     printTimestruct( pTime );
+#endif // _DEBUG_
 
     return( retVal );
 }
@@ -158,7 +159,10 @@ int dsDS3234::writeDate( struct _ds3234_timestruct_ *pTime )
 {
     int retVal;
 
-//    printTimestruct( pTime );
+#ifdef _DEBUG_
+    fprintf(stderr, "Set date/time to:\n");
+    printTimestruct( pTime );
+#endif // _DEBUG_
 
     memset(dataOut, '\0', DS3234_DATA_BUF_SIZE );
     memset(dataIn, '\0', DS3234_DATA_BUF_SIZE );
@@ -167,13 +171,17 @@ int dsDS3234::writeDate( struct _ds3234_timestruct_ *pTime )
 
     timestruct2Buffer( &dataOut[1], pTime, DS3234_NUM_DATE_REGS );
 
+#ifdef _DEBUG_
     dumpBuffer( dataOut, DS3234_NUM_DATE_REGS );
+#endif // _DEBUG_
 
     retVal = connection.xfer( DS_CONNECTION_MODE_WRITE, (void*) dataOut, 
                               (void*) dataIn, DS3234_NUM_DATE_REGS );
 
+#ifdef _DEBUG_
     printf("retVal = %d\n", retVal);
     dumpBuffer( dataIn, retVal );
+#endif // _DEBUG_
 
     return( retVal );
 }
@@ -203,7 +211,9 @@ int dsDS3234::setAlarm( struct _ds3234_alarm_settings_ *pAlarmSettings )
             dataOut[4] |= ((pAlarmSettings->alrmMode << 4) & 0b10000000);
             dataOut[3] |= ((pAlarmSettings->alrmMode << 2) & 0b01000000);
 
+#ifdef _DEBUG_
     dumpBuffer( dataOut, DS3234_NUM_ALARM_1_REGS );
+#endif // _DEBUG_
 
     retVal = connection.xfer( DS_CONNECTION_MODE_WRITE, (void*) dataOut, 
                               (void*) dataIn, DS3234_NUM_ALARM_1_REGS );
@@ -223,7 +233,9 @@ int dsDS3234::setAlarm( struct _ds3234_alarm_settings_ *pAlarmSettings )
                 dataOut[3] |= ((pAlarmSettings->alrmMode << 4) & 0b10000000);
                 dataOut[3] |= ((pAlarmSettings->alrmMode << 2) & 0b01000000);
 
+#ifdef _DEBUG_
     dumpBuffer( dataOut, DS3234_NUM_ALARM_2_REGS );
+#endif // _DEBUG_
 
     retVal = connection.xfer( DS_CONNECTION_MODE_WRITE, (void*) dataOut, 
                               (void*) dataIn, DS3234_NUM_ALARM_2_REGS );
@@ -260,7 +272,9 @@ int dsDS3234::readAlarm( struct _ds3234_alarm_settings_ *pAlarmSettings )
     retVal = connection.xfer( DS_CONNECTION_MODE_WRITE, (void*) dataOut, 
                               (void*) dataIn, DS3234_NUM_ALARM_1_REGS );
 
+#ifdef _DEBUG_
     dumpBuffer( dataOut, DS3234_NUM_ALARM_1_REGS );
+#endif // _DEBUG_
 
                 pAlarmSettings->second = bcd2bin( dataIn[1] );
                 pAlarmSettings->minute = bcd2bin( dataIn[2] );
@@ -277,7 +291,9 @@ int dsDS3234::readAlarm( struct _ds3234_alarm_settings_ *pAlarmSettings )
     retVal = connection.xfer( DS_CONNECTION_MODE_WRITE, (void*) dataOut, 
                               (void*) dataIn, DS3234_NUM_ALARM_2_REGS );
 
+#ifdef _DEBUG_
     dumpBuffer( dataOut, DS3234_NUM_ALARM_2_REGS );
+#endif // _DEBUG_
 
                     pAlarmSettings->second = 0;
                     pAlarmSettings->minute = bcd2bin( dataIn[1] );
@@ -371,7 +387,7 @@ int dsDS3234::disableAlarm( int alarmNo )
     return( retVal );
 }
 
-void dsDS3234::readAll( void )
+int dsDS3234::readAll( void )
 {
     int retVal;
 
@@ -383,8 +399,13 @@ void dsDS3234::readAll( void )
     retVal = connection.xfer( DS_CONNECTION_MODE_WRITE, (void*) dataOut, 
                               (void*) dataIn, DS3234_NUM_ACCESSIBLE_REGS );
 
+#ifdef _DEBUG_
     printf("retVal = %d\n", retVal);
     dumpBuffer( dataIn, retVal );
+#endif // _DEBUG_
+ 
+    return( retVal );
+
 }
 
 
